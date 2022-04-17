@@ -2,23 +2,6 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
 import requests, json, sys
 
-def get_crypto_json(start, count):
-
-    url = 'https://api.coinmarketcap.com/data-api/v3/cryptocurrency/listing?start={0}&limit={1}&sortBy=market_cap' \
-          '&sortType=desc&cryptoType=all&tagType=all&audited=false'.format(start, count)
-
-    jsonString = requests.get(url)
-
-    if jsonString.status_code != 200:
-        raise Exception("Сервер недоступен")
-
-    jsonObj = json.loads(jsonString.text)
-
-    if jsonObj['status']['error_code'] != '0':
-        raise Exception("Некорректные входные данные")
-
-    return jsonObj 
-
 class CryptoData(View):
     def __init__(self, window):
         self.setupUi(window)
@@ -28,23 +11,35 @@ class CryptoData(View):
         self.Next.clicked.connect(self.NextPage)
         self.Back.clicked.connect(self.PrevPage)
         self.Filter.textEdited.connect(self.FindCrypto)
-        self.CryptoPage = get_crypto_json(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
+        self.CryptoPage = self.pullJsonData(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
         self.filter = ""
         self.LoadPage(self.filter)
         
+    def pullJsonData(self, start, count):
+        url = 'https://api.coinmarketcap.com/data-api/v3/cryptocurrency/listing?start={0}&limit={1}&sortBy=market_cap' \
+            '&sortType=desc&cryptoType=all&tagType=all&audited=false'.format(start, count)
+
+        jsonString = requests.get(url)
+        if jsonString.status_code != 200:
+            raise Exception("Сервер недоступен")
+        jsonObj = json.loads(jsonString.text)
+        if jsonObj['status']['error_code'] != '0':
+            raise Exception("Некорректные входные данные")
+        return jsonObj 
+
     def FindCrypto(self):
         self.filter = self.Filter.text().lower()
         self.LoadPage(self.filter)
 
     def NextPage(self):
         self.PageStart += self.PageListSize
-        self.CryptoPage = get_crypto_json(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
+        self.CryptoPage = self.pullJsonData(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
         self.LoadPage(self.filter)
 
     def PrevPage(self):
         if self.PageStart != 1:
             self.PageStart -= self.PageListSize
-            self.CryptoPage = get_crypto_json(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
+            self.CryptoPage = self.pullJsonData(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
             self.LoadPage(self.filter)
 
     def CustomPercent(self, item, percentName):
