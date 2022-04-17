@@ -121,8 +121,6 @@ class CryptoData(View):
 
             self.gridLayout_2.addWidget(self.D7, i, 3, 1, 1)
 
-
-
             self.N.setText(_translate("MainWindow", key['name'] + " " + '(' + key['symbol'] + ')'))
             self.MC.setText(_translate("MainWindow", "$" + format(round(key['quotes'][0]['marketCap']), ',')))
             price = self.FindAccuracy(key)
