@@ -11,11 +11,11 @@ class CryptoData(View):
         self.Next.clicked.connect(self.NextPage)
         self.Back.clicked.connect(self.PrevPage)
         self.Filter.textEdited.connect(self.FindCrypto)
-        self.CryptoPage = self.pullJsonData(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
+        self.CryptoPage = self.PullJsonData(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
         self.filter = ""
         self.LoadPage(self.filter)
         
-    def pullJsonData(self, start, count):
+    def PullJsonData(self, start, count):
         url = 'https://api.coinmarketcap.com/data-api/v3/cryptocurrency/listing?start={0}&limit={1}&sortBy=market_cap' \
             '&sortType=desc&cryptoType=all&tagType=all&audited=false'.format(start, count)
 
@@ -25,7 +25,7 @@ class CryptoData(View):
         jsonObj = json.loads(jsonString.text)
         if jsonObj['status']['error_code'] != '0':
             raise Exception("Некорректные входные данные")
-        return jsonObj 
+        return jsonObj
 
     def FindCrypto(self):
         self.filter = self.Filter.text().lower()
@@ -33,13 +33,13 @@ class CryptoData(View):
 
     def NextPage(self):
         self.PageStart += self.PageListSize
-        self.CryptoPage = self.pullJsonData(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
+        self.CryptoPage = self.PullJsonData(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
         self.LoadPage(self.filter)
 
     def PrevPage(self):
         if self.PageStart != 1:
             self.PageStart -= self.PageListSize
-            self.CryptoPage = self.pullJsonData(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
+            self.CryptoPage = self.PullJsonData(self.PageStart, self.PageListSize)['data']['cryptoCurrencyList']
             self.LoadPage(self.filter)
 
     def CustomPercent(self, item, percentName):
